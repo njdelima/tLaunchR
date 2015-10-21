@@ -1,16 +1,58 @@
 <IfModule mod_rewrite.c>
-RewriteEngine On
-
-RewriteBase /your_dir
-
-RewriteCond %{REQUEST_URI} ^system.*
-RewriteRule ^(.*)$ /index.php?/$1 [L]
-
-RewriteCond %{REQUEST_URI} ^application.*
-RewriteRule ^(.*)$ /index.php?/$1 [L]
-
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|robots\.txt)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?/$1 [L]
+RewriteRule ^(.*)$ index.php?/$1 [L,QSA]
 
 </IfModule>
+
+<ifModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 seconds"
+  ExpiresByType text/html "access plus 1 seconds"
+  ExpiresByType image/gif "access plus 2592000 seconds"
+  ExpiresByType image/jpeg "access plus 2592000 seconds"
+  ExpiresByType image/png "access plus 2592000 seconds"
+  ExpiresByType text/css "access plus 604800 seconds" 
+  ExpiresByType text/javascript "access plus 216000 seconds"
+  ExpiresByType application/x-javascript "access plus 216000 seconds"
+</ifModule>
+
+<ifModule mod_headers.c>
+
+  <filesMatch "\\.(ico|pdf|flv|jpg|jpeg|png|gif|swf)$">
+    Header set Cache-Control "max-age=2592000, public"
+  </filesMatch>
+  <filesMatch "\\.(css)$">
+    Header set Cache-Control "max-age=604800, public"
+  </filesMatch>
+  <filesMatch "\\.(js)$">
+    Header set Cache-Control "max-age=216000, private"
+  </filesMatch>
+  <filesMatch "\\.(xml|txt)$">
+    Header set Cache-Control "max-age=216000, public, must-revalidate"
+  </filesMatch>
+  <filesMatch "\\.(html|htm|php)$">
+    Header set Cache-Control "max-age=1, private, must-revalidate"
+  </filesMatch>
+</ifModule> 
+
+####################
+# GZIP COMPRESSION #
+####################
+SetOutputFilter DEFLATE
+AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/x-javascript application/x-httpd-php
+BrowserMatch ^Mozilla/4 gzip-only-text/html
+BrowserMatch ^Mozilla/4\.0[678] no-gzip
+BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip
+Header append Vary User-Agent env=!dont-vary
+
+
+AuthType Basic
+AuthName "ADMIN"
+AuthUserFile "/home/tlaun7nd/.htpasswds/public_html/passwd"
+require valid-user
+
